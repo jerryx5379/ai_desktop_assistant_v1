@@ -1,0 +1,11 @@
+* {
+    font-family: "Consolas";
+}
+
+QTextBrowser#userBubble,
+QTextBrowser#assistantBubble {
+    border-radius: 10px; 
+    padding: 8px;
+    margin: 4px;
+    border: none;
+}

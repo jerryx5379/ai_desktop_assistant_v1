@@ -1,0 +1,10 @@
+QTextBrowser#userBubble {
+    background-color: #333333;
+    color: white;
+}
+
+QTextBrowser#assistantBubble {
+    background-color: transparent;
+    color: white;
+
+}
