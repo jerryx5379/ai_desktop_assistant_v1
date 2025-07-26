@@ -22,6 +22,12 @@ class ChatBox(QScrollArea):
 
         self.messages = [{"role":"system", "content": ChatBox.SYS_INSTRUC}]
 
+    def get_scroll_content(self):
+        return self.scroll_content
+    
+    def get_scroll_layout(self):
+        return self.scroll_layout
+
     def update_chat_context(self, role:str, message:str): 
         self.messages.append({"role":role,"content":message})
         if len(self.messages) > self.MAX_CONTEXT_MESSAGES+1:

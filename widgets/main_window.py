@@ -31,7 +31,7 @@ class MainChatWindow(QWidget):
         super().__init__()
         self.setWindowTitle("Assistant")
         self.setMinimumSize(150,250) 
-        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+        #self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         
         self.main_layout = QVBoxLayout(self)
 

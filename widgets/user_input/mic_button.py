@@ -1,0 +1,41 @@
+from PySide6.QtWidgets import (
+    QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout
+)
+from PySide6.QtGui import QTextCursor, QFontMetrics, QIcon
+from PySide6.QtCore import QThread, QTimer, Qt, Signal, QSize
+
+import markdown
+from pygments.formatters.html import HtmlFormatter
+
+from threads import OllamaWorker
+from widgets.chat_box import ChatBubble
+from .input_text_box import InputTextBox
+from logic import MicButtonController
+
+class MicButton(QPushButton):
+    send_message_signal = Signal() # when the mic button is on, can automatically send messages to the chat
+    update_input_box = Signal(str)
+
+    def __init__(self):
+        super().__init__()
+        self.setIcon(QIcon("assets/icons/mic.svg"))
+        self.setIconSize(QSize(24,24))
+        self.setStyleSheet("background-color: gray")
+
+        self.clicked.connect(self.on_button_click)
+
+        self.mic_controller = MicButtonController(self)
+        self.mic_controller.send_message_signal.connect(self.send_message_signal.emit)
+        self.mic_controller.update_input_box_signal.connect(self.update_user_text_box)
+
+    def on_button_click(self):
+        is_running = self.mic_controller.worker_thread and self.mic_controller.worker_thread.isRunning()
+        
+        if is_running:
+            self.mic_controller.disable_mic_input()
+        else:
+            self.mic_controller.load_model_and_stream_audio()
+
+    def update_user_text_box(self,text):
+        self.update_input_box.emit(text)
+

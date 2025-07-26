@@ -28,12 +28,18 @@ from PySide6.QtCore import QObject, QThread, QTimer, Qt
 
 
 class ChatController(QObject):
-    def __init__(self, chat_box, user_input):
+    def __init__(self, chat_box, user_input, prompt=None):
         super().__init__()
 
         self.chat_box = chat_box
         self.user_input = user_input
+        self.prompt = prompt
 
+        self.scroll_content = self.chat_box.get_scroll_content()
+        self.scroll_layout = self.chat_box.get_scroll_layout()
+        self.send_button = self.user_input.get_send_button()
+        self.input_text_box = self.user_input.get_input_text_box()
+        
         self.total_chat_bubbles_height = 0
         self.layout_spacing = self.chat_box.scroll_layout.spacing()
         self.total_scroll_content_height = 0
@@ -42,24 +48,30 @@ class ChatController(QObject):
         QTimer.singleShot(0,lambda: self.get_indiv_line_height(sample_chat_bubble))
 
     def send_message(self):
-        text = self.user_input.input_text.toPlainText().strip() 
+        if not self.send_button.isEnabled():
+            return
+
+        if self.prompt:
+            text = self.prompt
+        else:
+            text = self.input_text_box.toPlainText().strip() 
         if not text:
             return
 
-        self.user_input.send_button.setEnabled(False) 
+        self.send_button.setEnabled(False) 
 
         # This adds the user's text message to the chat_box
         self.chat_bubble = ChatBubble(text=text, sender= "user")
-        self.chat_box.scroll_layout.insertWidget(self.chat_box.scroll_layout.count(), self.chat_bubble)
+        self.scroll_layout.insertWidget(self.scroll_layout.count(), self.chat_bubble)
         self.chat_box.update_chat_context(role = "user", message = text)
-        self.user_input.input_text.clear()
+        self.input_text_box.clear()
 
         sample_chat_bubble = ChatBubble(text="1",sender="user") # used to get unit height of a chat bubble
         QTimer.singleShot(0,lambda: self.add_preview_height(sample_chat_bubble))
 
         # This adds the llm's response to chatbox. while the response is being streamed on another thread, user cannot send another message
         self.chat_bubble = ChatBubble(text=text,sender = "assistant")
-        self.chat_box.scroll_layout.insertWidget(self.chat_box.scroll_layout.count(), self.chat_bubble)
+        self.scroll_layout.insertWidget(self.scroll_layout.count(), self.chat_bubble)
 
         self.thread = QThread()
         self.thread.setObjectName("Ollama_inference_thread")
@@ -85,7 +97,7 @@ class ChatController(QObject):
 
         if self.chat_bubble.height() + self.total_chat_bubbles_height + self.layout_spacing > self.total_scroll_content_height:
             self.total_scroll_content_height += 5*self.layout_spacing
-            self.chat_box.scroll_content.setMinimumHeight(self.total_scroll_content_height)
+            self.scroll_content.setMinimumHeight(self.total_scroll_content_height)
 
     def worker_finished(self, response):
         self.chat_box.update_chat_context(role = "assistant", message = response)
@@ -118,7 +130,7 @@ class ChatController(QObject):
         #adjust_height = self.chat_bubble.height() + 2*self.layout_spacing + self.total_chat_bubbles_height
         #self.chat_box.scroll_content.setMinimumHeight(adjust_height)
         
-        self.user_input.send_button.setEnabled(True) 
+        self.send_button.setEnabled(True) 
 
     def add_preview_height(self, sample_chat_bubble:QTextBrowser):
         self.add_to_chat_bubbles_total_height()
@@ -129,7 +141,7 @@ class ChatController(QObject):
 
         self.total_scroll_content_height = self.total_chat_bubbles_height + padding_height
 
-        self.chat_box.scroll_content.setMinimumHeight(self.total_scroll_content_height)
+        self.scroll_content.setMinimumHeight(self.total_scroll_content_height)
 
         self.chat_box.verticalScrollBar().setValue( 
             self.chat_box.verticalScrollBar().maximum()
@@ -137,7 +149,7 @@ class ChatController(QObject):
 
     ### Helper Functions ###
     def add_to_chat_bubbles_total_height(self):
-        layout = self.chat_box.scroll_layout
+        layout = self.scroll_layout
 
         if layout.count() == 2: 
             height = layout.itemAt(0).widget().height()
