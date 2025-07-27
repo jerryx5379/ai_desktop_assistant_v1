@@ -36,13 +36,15 @@ class ChatBox(QScrollArea):
     def clear_messages(self):
         self.messages = [{"role":"system", "content": ChatBox.SYS_INSTRUC}]
 
-    def get_data(self):
+    def get_data_regular(self):
         model = ChatBox.MODEL
         data = {
             "model": model,
             "messages": self.messages
         }
         return data
+    
+
     
 
 

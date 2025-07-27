@@ -11,6 +11,7 @@ from threads import OllamaWorker
 from widgets.chat_box import ChatBubble
 from .input_text_box import InputTextBox
 from .mic_button import MicButton
+from .send_button import SendButton
 
 class UserInput(QVBoxLayout):
     send_message_signal = Signal()
@@ -24,9 +25,7 @@ class UserInput(QVBoxLayout):
 
         self.buttons_layout.addStretch()
         self.mic_button = MicButton()
-        self.send_button = QPushButton()
-        self.send_button.setIcon(QIcon("assets/icons/send.svg"))
-        self.send_button.setIconSize(QSize(24,24))
+        self.send_button = SendButton()
 
         self.buttons_layout.addWidget(self.mic_button)
         self.buttons_layout.addWidget(self.send_button)

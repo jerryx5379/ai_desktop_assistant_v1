@@ -39,5 +39,13 @@ class OllamaWorker(QObject):
         
         self.finished.emit(assis_response)
 
+    def generate_ollama(self):
+        response = requests.post(url=self.url, json=self.data)
+
+        result = response.json()
+        #print(result['response'])
+        
+        self.finished.emit(result['response'])
+
 
     

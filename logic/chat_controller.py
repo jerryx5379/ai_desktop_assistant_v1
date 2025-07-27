@@ -25,7 +25,7 @@ from threads import OllamaWorker
 from widgets.chat_box import ChatBubble
 from PySide6.QtCore import QObject, QThread, QTimer, Qt
 
-
+from core import CallableFunctions
 
 class ChatController(QObject):
     def __init__(self, chat_box, user_input, prompt=None):
@@ -49,6 +49,7 @@ class ChatController(QObject):
 
     def send_message(self):
         if not self.send_button.isEnabled():
+            self.input_text_box.clear()
             return
 
         if self.prompt:
@@ -74,20 +75,18 @@ class ChatController(QObject):
         self.scroll_layout.insertWidget(self.scroll_layout.count(), self.chat_bubble)
 
         self.thread = QThread()
-        self.thread.setObjectName("Ollama_inference_thread")
-
-        url = "http://localhost:11434/api/chat"
-        data = self.chat_box.get_data()
+        self.thread.setObjectName("Ollama_inference_tool_call_thread")
+        url = "http://localhost:11434/api/generate"
+        data = self.get_data_tool_call(text)
         self.worker = OllamaWorker(url=url, data=data)
         self.worker.moveToThread(self.thread)
 
-        self.thread.started.connect(self.worker.stream_ollama)
-        self.worker.text_chunk.connect(self.handle_output_chunk)
-        self.worker.finished.connect(self.worker_finished)
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.started.connect(self.thinking_text)
+        self.thread.started.connect(self.worker.generate_ollama)
+        self.worker.finished.connect(self.finished_generating_tool_call_response) # rest of the send_message logic is here
+
         self.thread.start()
+
 
     def handle_output_chunk(self, chunk):
         # Append new chunk to chat_bubble, keeping existing text
@@ -131,6 +130,7 @@ class ChatController(QObject):
         #self.chat_box.scroll_content.setMinimumHeight(adjust_height)
         
         self.send_button.setEnabled(True) 
+        self.end_thread()
 
     def add_preview_height(self, sample_chat_bubble:QTextBrowser):
         self.add_to_chat_bubbles_total_height()
@@ -146,6 +146,94 @@ class ChatController(QObject):
         self.chat_box.verticalScrollBar().setValue( 
             self.chat_box.verticalScrollBar().maximum()
         )
+
+    def get_data_tool_call(self,user_prompt):
+        prompt_skeleton = """Determine if the following prompt requires each of these function calls:
+change_system_theme_to_dark
+change_system_theme_to_light
+0 means no. 1 means yes
+Prompt:"""
+
+        prompt = prompt_skeleton + user_prompt
+
+        data = {
+            "model": "gemma3n:e2b",
+            "prompt": prompt,
+            "stream": False,
+            "format": {
+                "type": "object",
+                "properties": {
+                "change_to_dark_theme": {
+                    "type": "integer"
+                },
+                "change_to_light_theme": {
+                    "type": "integer"
+                }
+                },
+                "required": [
+                "change_to_dark_theme",
+                "change_to_light_theme"
+                ]
+            }
+        }
+
+        return data
+
+    def finished_generating_tool_call_response(self, result):
+        """
+        result looks like:
+
+        {
+        "change_to_dark_theme": int,
+        "change_to_light_theme": int
+        }
+
+        """
+        self.end_thread()
+
+        llm_result = json.loads(result)
+
+        # if there is a tool call, then just do that, otherwise send request to llm as usual
+        if 1 in llm_result.values():
+            # start another thread to carry out the tool call
+            self.tool_call_thread = QThread()
+            self.tool_call_thread.setObjectName("thread_for_callable_functions")
+            self.callable_functions = CallableFunctions(llm_result)
+            self.callable_functions.moveToThread(self.tool_call_thread)
+
+            self.tool_call_thread.started.connect(self.callable_functions.call_functions)
+            self.callable_functions.error.connect(self.print_error)
+            self.callable_functions.finished.connect(self.tool_call_worker_finished)
+            
+            self.tool_call_thread.start()
+        else:
+            self.thread = QThread()
+            self.thread.setObjectName("Ollama_inference_thread")
+
+            url = "http://localhost:11434/api/chat"
+            data = self.chat_box.get_data_regular()
+            self.worker = OllamaWorker(url=url, data=data)
+            self.worker.moveToThread(self.thread)
+
+            self.thread.started.connect(self.clear_chat_bubble)
+            self.thread.started.connect(self.worker.stream_ollama)
+            self.worker.text_chunk.connect(self.handle_output_chunk)
+            self.worker.finished.connect(self.worker_finished)
+
+            self.thread.start()
+            return
+
+    def tool_call_worker_finished(self, text):
+        text_html = "<i>" + text + "</i>"
+        self.chat_bubble.setHtml(text_html)
+
+        self.tool_call_thread.quit()
+        self.tool_call_thread.wait()
+        self.callable_functions.deleteLater()
+        self.tool_call_thread.deleteLater()
+
+        self.chat_box.update_chat_context(role = "assistant", message = text)
+        self.send_button.setEnabled(True)
 
     ### Helper Functions ###
     def add_to_chat_bubbles_total_height(self):
@@ -181,5 +269,18 @@ class ChatController(QObject):
         )
         return brightness < 128
 
+    def end_thread(self):
+        self.thread.quit()
+        self.thread.wait()
+        self.worker.deleteLater()
+        self.thread.deleteLater()
 
+    def thinking_text(self):
+        text = "<i>Reading Message</i>"
+        self.chat_bubble.setHtml(text)
 
+    def print_error(self, error):
+        print(error)
+
+    def clear_chat_bubble(self):
+        self.chat_bubble.setPlainText("")
