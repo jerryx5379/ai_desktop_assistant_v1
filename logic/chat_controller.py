@@ -139,7 +139,7 @@ class ChatController(QObject):
         viewport_height = self.chat_box.viewport().height()
         padding_height = viewport_height - unit_height_of_chat_bubble
 
-        self.total_scroll_content_height = self.total_chat_bubbles_height + padding_height
+        self.total_scroll_content_height = self.total_chat_bubbles_height + 0.94*padding_height
 
         self.scroll_content.setMinimumHeight(self.total_scroll_content_height)
 

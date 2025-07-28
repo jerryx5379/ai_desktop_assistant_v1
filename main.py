@@ -5,12 +5,17 @@ It also sets application level details like system name of this app, application
 """
 
 # TODO: add load model and unload model on program start and end
+# TODO: add save chat on program close
 
 # This version TODO: 
-# 1. add voice to speech tech with openai whisper
-# 2. add the text from voice to the gemma 3n model
-# 3. have the model determine if the reqeust is to modify the system os
-# 4. have a tool calling step
+# Add a tool bar at the top of the chat:
+# 1. clear chat -> clear chat and save chat
+# 2. previous chats -> new window: previous chats 
+# 3. on program/window close, save chat
+
+# plan:
+# first create the tool bar on top
+# then add funcitonality
 
 
 from PySide6.QtWidgets import QApplication

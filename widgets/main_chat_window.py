@@ -9,6 +9,7 @@ import json
 
 from .chat_box import ChatBox
 from .user_input import UserInput
+from .tool_bar import Toolbar
 from widgets.chat_box import ChatBubble
 
 
@@ -35,11 +36,13 @@ class MainChatWindow(QWidget):
         
         self.main_layout = QVBoxLayout(self)
 
+        self.tool_bar = Toolbar()
         self.chat_box = ChatBox()
         self.user_input = UserInput() 
 
-        self.main_layout.addWidget(self.chat_box)
-        self.main_layout.addLayout(self.user_input)
+        self.main_layout.addWidget(self.tool_bar, 0)
+        self.main_layout.addWidget(self.chat_box, 1)
+        self.main_layout.addWidget(self.user_input, 0)
 
         self.chat_controller = ChatController(chat_box=self.chat_box, user_input=self.user_input)
 

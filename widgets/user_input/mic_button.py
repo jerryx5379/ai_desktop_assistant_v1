@@ -20,7 +20,15 @@ class MicButton(QPushButton):
         super().__init__()
         self.setIcon(QIcon("assets/icons/mic.svg"))
         self.setIconSize(QSize(24,24))
-        self.setStyleSheet("background-color: gray")
+        self.setStyleSheet("""
+        QPushButton {
+            background-color: transparent;
+            border: none;
+        }
+        QPushButton:hover {
+            background-color: #a4a6a5;  
+        }
+        """)   
 
         self.clicked.connect(self.on_button_click)
 

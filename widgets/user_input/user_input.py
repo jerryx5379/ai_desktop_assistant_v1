@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout
+    QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout,QFrame, QSizePolicy
 )
 from PySide6.QtGui import QTextCursor, QFontMetrics, QIcon
 from PySide6.QtCore import QThread, QTimer, Qt, Signal, QSize
@@ -13,20 +13,28 @@ from .input_text_box import InputTextBox
 from .mic_button import MicButton
 from .send_button import SendButton
 
-class UserInput(QVBoxLayout):
+
+class UserInput(QFrame):
     send_message_signal = Signal()
 
     def __init__(self):
         super().__init__()
         self.setObjectName("userInput")
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)    
+        self.setStyleSheet("background-color:#666666")
+
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(0,0,0,0) 
+        self.main_layout.setSpacing(0)
 
         # Layout for the buttons (send_button, mic_button)
         self.buttons_layout = QHBoxLayout()
+        self.buttons_layout.setSpacing(10)
 
-        self.buttons_layout.addStretch()
         self.mic_button = MicButton()
         self.send_button = SendButton()
 
+        self.buttons_layout.addStretch()
         self.buttons_layout.addWidget(self.mic_button)
         self.buttons_layout.addWidget(self.send_button)
         
@@ -34,8 +42,8 @@ class UserInput(QVBoxLayout):
         self.input_text = InputTextBox(send_button=self.send_button)
 
         # Add usertextbox and buttons layout to main layout
-        self.addWidget(self.input_text)
-        self.addLayout(self.buttons_layout)
+        self.main_layout.addWidget(self.input_text)
+        self.main_layout.addLayout(self.buttons_layout)
 
         # Conenct signals that send the message
         self.send_button.clicked.connect(self.send_message_signal.emit)

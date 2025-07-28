@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout
+    QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout, QWidget
 )
 from PySide6.QtGui import QTextCursor, QFontMetrics, QIcon
 from PySide6.QtCore import QThread, QTimer, Qt, Signal, QSize
@@ -9,13 +9,12 @@ from pygments.formatters.html import HtmlFormatter
 
 from threads import OllamaWorker
 from widgets.chat_box import ChatBubble
-from .input_text_box import InputTextBox
-from .mic_button import MicButton
 
-class SendButton(QPushButton):
+
+class HistoryButton(QPushButton):
     def __init__(self):
         super().__init__()
-        self.setIcon(QIcon("assets/icons/send.svg"))
+        self.setIcon(QIcon("assets/icons/history.svg"))
         self.setIconSize(QSize(24,24))
         self.setStyleSheet("""
         QPushButton {
@@ -23,13 +22,11 @@ class SendButton(QPushButton):
             border: none;
             color: white;
         }
-        QPushButton:disabled {
-            background-color: transparent;
-            color: #aaaaaa;
-        }
-
         QPushButton:hover {
-            background-color: #a4a6a5;
+            background-color: #a4a6a5;  
         }
-        """)   
-       
+        """)        
+        self.setToolTip("Previous Chats")
+
+
+        

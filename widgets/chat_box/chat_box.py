@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QScrollArea
+    QWidget, QVBoxLayout, QScrollArea, QSizePolicy
 )
 from PySide6.QtCore import Qt
 
@@ -12,6 +12,7 @@ class ChatBox(QScrollArea):
     def __init__(self):
         super().__init__()
         self.setWidgetResizable(True)  # Automatically resize the QWidget inside the scrollarea to the scrollarea viewport size
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.scroll_content = QWidget() # This is the "div" that is inside scroll_area

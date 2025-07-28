@@ -60,16 +60,42 @@ class MicButtonController(QObject):
 
     ### Helper Functions ###
     def is_off_ui(self):
-        self.mic_button.setStyleSheet("background-color: gray")
+        self.mic_button.setStyleSheet("""
+        QPushButton {
+            background-color: transparent;
+            border: none;
+        }
+        QPushButton:hover {
+            background-color: #a4a6a5;  
+        }
+        """)   
+
         self.mic_button.setEnabled(True)
 
     def is_loading_ui(self):
-        self.mic_button.setStyleSheet("background-color: yellow")
+        self.mic_button.setStyleSheet("""
+        QPushButton {
+            background-color: yellow;
+            border: none;
+        }
+        QPushButton:hover {
+            background-color: #a4a6a5;  
+        }
+        """)         
+
         self.mic_button.setEnabled(False)
 
-
     def is_on_ui(self):
-        self.mic_button.setStyleSheet("background-color: green")
+        self.mic_button.setStyleSheet("""
+        QPushButton {
+            background-color: green;
+            border: none;
+        }
+        QPushButton:hover {
+            background-color: #a4a6a5;  
+        }
+        """)         
+
         self.mic_button.setEnabled(True)
 
     def end_thread(self):

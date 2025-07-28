@@ -1,3 +1,3 @@
-from .main_window import MainChatWindow
+from .main_chat_window import MainChatWindow
 
 __all__ = ["MainChatWindow",]

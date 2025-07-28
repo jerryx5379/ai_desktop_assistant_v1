@@ -12,7 +12,10 @@ class InputTextBox(QTextEdit):
     def __init__(self, send_button):  
         super().__init__()
         self.setObjectName("inputTextBox")
-        self.setFixedHeight(32) # Initial height for the textbox
+        self.setFixedHeight(32) 
+        self.setPlaceholderText("Ask anything...")
+        self.setStyleSheet("QTextEdit { border: none;}")
+
         self.textChanged.connect(self.adjust_input_height) # increase input box size based on how much the user types up to 3 times the normal
 
         self.send_button = send_button
