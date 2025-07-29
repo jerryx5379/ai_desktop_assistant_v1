@@ -23,6 +23,7 @@ class ChatBox(QScrollArea):
 
         self.messages = [{"role":"system", "content": ChatBox.SYS_INSTRUC}]
 
+    ### Getters ###
     def get_scroll_content(self):
         return self.scroll_content
     
@@ -34,8 +35,17 @@ class ChatBox(QScrollArea):
         if len(self.messages) > self.MAX_CONTEXT_MESSAGES+1:
             self.messages.pop(1)
 
-    def clear_messages(self):
+    ### Methods related to the chatbox and its messages ###
+    def clear_context(self):
         self.messages = [{"role":"system", "content": ChatBox.SYS_INSTRUC}]
+
+    def clear_messages(self):
+        while self.scroll_layout.count():
+            print(self.scroll_layout.count())
+            item = self.scroll_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater() 
 
     def get_data_regular(self):
         model = ChatBox.MODEL
@@ -44,6 +54,8 @@ class ChatBox(QScrollArea):
             "messages": self.messages
         }
         return data
+    
+
     
 
     

@@ -83,33 +83,40 @@ class ChatController(QObject):
 
         self.thread.started.connect(self.thinking_text)
         self.thread.started.connect(self.worker.generate_ollama)
+        self.worker.early_cancel_signal.connect(self.early_cancel_func)
         self.worker.finished.connect(self.finished_generating_tool_call_response) # rest of the send_message logic is here
 
         self.thread.start()
 
 
     def handle_output_chunk(self, chunk):
-        # Append new chunk to chat_bubble, keeping existing text
-        self.chat_bubble.moveCursor(QTextCursor.End)
-        self.chat_bubble.insertPlainText(chunk)
-        self.chat_bubble.ensureCursorVisible()
+        try:
+            # Append new chunk to chat_bubble, keeping existing text
+            self.chat_bubble.moveCursor(QTextCursor.End)
+            self.chat_bubble.insertPlainText(chunk)
+            self.chat_bubble.ensureCursorVisible()
 
-        if self.chat_bubble.height() + self.total_chat_bubbles_height + self.layout_spacing > self.total_scroll_content_height:
-            self.total_scroll_content_height += 5*self.layout_spacing
-            self.scroll_content.setMinimumHeight(self.total_scroll_content_height)
+            if self.chat_bubble.height() + self.total_chat_bubbles_height + self.layout_spacing > self.total_scroll_content_height:
+                self.total_scroll_content_height += 5*self.layout_spacing
+                self.scroll_content.setMinimumHeight(self.total_scroll_content_height)
+        except Exception as e:
+            return
+        
 
     def worker_finished(self, response):
-        self.chat_box.update_chat_context(role = "assistant", message = response)
+        if hasattr(self, 'chat_bubble') and self.chat_bubble is not None:
+            self.chat_box.update_chat_context(role = "assistant", message = response)
 
-        # basic formatting: get the plain text, convert it to html then set html
-        text_html = markdown.markdown(text=response,extensions=['fenced_code','tables','codehilite'])
-        if self.is_dark_theme():
-            style = HtmlFormatter(style='monokai').get_style_defs('.codehilite')
-        else:
-            style = HtmlFormatter(style='manni').get_style_defs('.codehilite')
+        try:
+            # basic formatting: get the plain text, convert it to html then set html
+            text_html = markdown.markdown(text=response,extensions=['fenced_code','tables','codehilite'])
+            if self.is_dark_theme():
+                style = HtmlFormatter(style='monokai').get_style_defs('.codehilite')
+            else:
+                style = HtmlFormatter(style='manni').get_style_defs('.codehilite')
 
 
-        text_html = f"""
+            text_html = f"""
 <style>
 {style}
 .codehilite {{
@@ -120,14 +127,16 @@ class ChatController(QObject):
 </style>
 {text_html}
 """
-        self.chat_bubble.setHtml(text_html)
+            self.chat_bubble.setHtml(text_html)
 
-        if '<code' in text_html and '</code>' in text_html:
-            self.chat_bubble.ignore_keypress_scrolling = False
-            self.chat_bubble.ignore_wheel_event = False
+            if '<code' in text_html and '</code>' in text_html:
+                self.chat_bubble.ignore_keypress_scrolling = False
+                self.chat_bubble.ignore_wheel_event = False
 
-        #adjust_height = self.chat_bubble.height() + 2*self.layout_spacing + self.total_chat_bubbles_height
-        #self.chat_box.scroll_content.setMinimumHeight(adjust_height)
+            #adjust_height = self.chat_bubble.height() + 2*self.layout_spacing + self.total_chat_bubbles_height
+            #self.chat_box.scroll_content.setMinimumHeight(adjust_height)
+        except Exception as e:
+            print("error finalizing response chat_bubble. likely cleared chat while it was working")
         
         self.send_button.setEnabled(True) 
         self.end_thread()
@@ -196,16 +205,16 @@ Prompt:"""
         # if there is a tool call, then just do that, otherwise send request to llm as usual
         if 1 in llm_result.values():
             # start another thread to carry out the tool call
-            self.tool_call_thread = QThread()
-            self.tool_call_thread.setObjectName("thread_for_callable_functions")
-            self.callable_functions = CallableFunctions(llm_result)
-            self.callable_functions.moveToThread(self.tool_call_thread)
+            self.thread = QThread()
+            self.thread.setObjectName("thread_for_callable_functions")
+            self.worker = CallableFunctions(llm_result)
+            self.worker.moveToThread(self.thread)
 
-            self.tool_call_thread.started.connect(self.callable_functions.call_functions)
-            self.callable_functions.error.connect(self.print_error)
-            self.callable_functions.finished.connect(self.tool_call_worker_finished)
+            self.thread.started.connect(self.worker.call_functions)
+            self.worker.error.connect(self.print_error)
+            self.worker.finished.connect(self.tool_call_worker_finished)
             
-            self.tool_call_thread.start()
+            self.thread.start()
         else:
             self.thread = QThread()
             self.thread.setObjectName("Ollama_inference_thread")
@@ -218,22 +227,27 @@ Prompt:"""
             self.thread.started.connect(self.clear_chat_bubble)
             self.thread.started.connect(self.worker.stream_ollama)
             self.worker.text_chunk.connect(self.handle_output_chunk)
+            self.worker.early_cancel_signal.connect(self.early_cancel_func)
             self.worker.finished.connect(self.worker_finished)
 
             self.thread.start()
             return
 
     def tool_call_worker_finished(self, text):
-        text_html = "<i>" + text + "</i>"
-        self.chat_bubble.setHtml(text_html)
+        try:
+            text_html = "<i>" + text + "</i>"
+            self.chat_bubble.setHtml(text_html)
 
-        self.tool_call_thread.quit()
-        self.tool_call_thread.wait()
-        self.callable_functions.deleteLater()
-        self.tool_call_thread.deleteLater()
+            self.chat_box.update_chat_context(role = "assistant", message = text)
+        except:
+            pass
 
-        self.chat_box.update_chat_context(role = "assistant", message = text)
         self.send_button.setEnabled(True)
+
+        self.end_thread()
+
+    
+
 
     ### Helper Functions ###
     def add_to_chat_bubbles_total_height(self):
@@ -283,4 +297,26 @@ Prompt:"""
         print(error)
 
     def clear_chat_bubble(self):
-        self.chat_bubble.setPlainText("")
+        try:
+            self.chat_bubble.setPlainText("")
+        except:
+            pass
+
+    def set_early_cancel(self):
+        self.worker.set_early_cancel()
+
+        self.total_chat_bubbles_height = 0
+        self.layout_spacing = self.chat_box.scroll_layout.spacing()
+        self.total_scroll_content_height = 0
+
+    def early_cancel_func(self):
+        self.send_button.setEnabled(True)
+        self.end_thread()
+
+        self.total_chat_bubbles_height = 0
+        self.layout_spacing = self.chat_box.scroll_layout.spacing()
+        self.total_scroll_content_height = 0
+
+
+
+

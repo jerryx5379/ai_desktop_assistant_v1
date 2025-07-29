@@ -1,5 +1,5 @@
 import json
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, Slot
 import requests
 
 from PySide6.QtCore import QObject, Signal
@@ -7,19 +7,27 @@ from PySide6.QtCore import QObject, Signal
 class OllamaWorker(QObject):
     text_chunk = Signal(str) 
     finished  = Signal(str)
+    early_cancel_signal = Signal()
 
     def __init__(self, url, data):
         super().__init__()
 
         self.url = url
         self.data = data
+        self.EARLY_CANCEL = False
         
+    @Slot()
     def stream_ollama(self):
         with requests.post(url=self.url, json=self.data, stream=True) as response:
             response.raise_for_status() 
             
             assis_response = ""
             for line in response.iter_lines():
+
+                if self.EARLY_CANCEL:
+                    self.early_cancel_signal.emit()
+                    return
+
                 if line:
                     chunk = json.loads(line.decode("utf-8"))\
                     
@@ -39,13 +47,21 @@ class OllamaWorker(QObject):
         
         self.finished.emit(assis_response)
 
+    @Slot()
     def generate_ollama(self):
         response = requests.post(url=self.url, json=self.data)
 
         result = response.json()
         #print(result['response'])
         
-        self.finished.emit(result['response'])
+        if self.EARLY_CANCEL:
+            self.early_cancel_signal.emit()
+        else:
+            self.finished.emit(result['response'])
+
+    @Slot()
+    def set_early_cancel(self):
+        self.EARLY_CANCEL = True
 
 
     

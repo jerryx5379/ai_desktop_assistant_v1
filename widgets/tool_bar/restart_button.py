@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout, QWidget
 )
 from PySide6.QtGui import QTextCursor, QFontMetrics, QIcon
-from PySide6.QtCore import QThread, QTimer, Qt, Signal, QSize
+from PySide6.QtCore import QThread, QTimer, Qt, Signal, QSize, Signal
 
 import markdown
 from pygments.formatters.html import HtmlFormatter
@@ -12,6 +12,8 @@ from widgets.chat_box import ChatBubble
 
 
 class RestartButton(QPushButton):
+    clear_chat = Signal()
+
     def __init__(self):
         super().__init__()
         self.setIcon(QIcon("assets/icons/restart.svg"))
@@ -27,6 +29,8 @@ class RestartButton(QPushButton):
         }
         """)        
         self.setToolTip("Clear chat")
+
+        self.clicked.connect(self.clear_chat.emit)
 
 
         

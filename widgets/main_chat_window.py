@@ -25,7 +25,7 @@ from pygments.formatters.html import HtmlFormatter
 from threads import OllamaWorker
 from widgets.chat_box import chat_bubble
 
-from logic import ChatController
+from logic import ChatController, ToolBarController
 
 class MainChatWindow(QWidget):  
     def __init__(self):
@@ -45,8 +45,11 @@ class MainChatWindow(QWidget):
         self.main_layout.addWidget(self.user_input, 0)
 
         self.chat_controller = ChatController(chat_box=self.chat_box, user_input=self.user_input)
-
         self.user_input.send_message_signal.connect(self.chat_controller.send_message)
+
+        self.tool_bar_controller = ToolBarController(chat_box=self.chat_box)
+        self.tool_bar.clear_chat.connect(self.tool_bar_controller.clear_chat)
+        self.tool_bar_controller.early_cancel.connect(self.chat_controller.set_early_cancel)
 
         self.config_path = pathlib.Path.home() / ".Ollama_project_config.json"
 
