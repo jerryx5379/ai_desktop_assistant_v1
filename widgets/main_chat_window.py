@@ -1,8 +1,7 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QTextBrowser
+    QWidget, QVBoxLayout
 )
-from PySide6.QtCore import Qt, QEvent, QTimer
-
+from PySide6.QtCore import Qt, QEvent
 
 import pathlib
 import json
@@ -10,28 +9,15 @@ import json
 from .chat_box import ChatBox
 from .user_input import UserInput
 from .tool_bar import Toolbar
-from widgets.chat_box import ChatBubble
 
-
-from PySide6.QtWidgets import (
-    QHBoxLayout,QPushButton,QTextBrowser
-)
-from PySide6.QtGui import QTextCursor, QFontMetrics
-from PySide6.QtCore import QThread, QTimer, Qt
-
-import markdown
-from pygments.formatters.html import HtmlFormatter
-
-from threads import OllamaWorker
-from widgets.chat_box import chat_bubble
-
-from logic import ChatController, ToolBarController
+from logic import ChatController, ToolBarController, RagController
 
 class MainChatWindow(QWidget):  
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Assistant")
         self.setMinimumSize(150,250) 
+        self.setWindowOpacity(0.80)
         #self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         
         self.main_layout = QVBoxLayout(self)
@@ -44,12 +30,16 @@ class MainChatWindow(QWidget):
         self.main_layout.addWidget(self.chat_box, 1)
         self.main_layout.addWidget(self.user_input, 0)
 
-        self.chat_controller = ChatController(chat_box=self.chat_box, user_input=self.user_input)
-        self.user_input.send_message_signal.connect(self.chat_controller.send_message)
 
         self.tool_bar_controller = ToolBarController(chat_box=self.chat_box)
         self.tool_bar.clear_chat.connect(self.tool_bar_controller.clear_chat)
+        
+        self.chat_controller = ChatController(chat_box=self.chat_box, user_input=self.user_input)
+        self.user_input.send_message_signal.connect(self.chat_controller.send_message)
         self.tool_bar_controller.early_cancel.connect(self.chat_controller.set_early_cancel)
+
+        self.rag_controller = RagController()
+        self.user_input.open_rag_window_signal.connect(self.rag_controller.open_rag_window) 
 
         self.config_path = pathlib.Path.home() / ".Ollama_project_config.json"
 
@@ -93,6 +83,11 @@ class MainChatWindow(QWidget):
     
 
     
+
+
+
+
+
 
 
 

@@ -1,16 +1,9 @@
 from PySide6.QtWidgets import (
-    QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout
+    QPushButton
 )
-from PySide6.QtGui import QTextCursor, QFontMetrics, QIcon
-from PySide6.QtCore import QThread, QTimer, Qt, Signal, QSize
+from PySide6.QtGui import QIcon
+from PySide6.QtCore import QSize
 
-import markdown
-from pygments.formatters.html import HtmlFormatter
-
-from threads import OllamaWorker
-from widgets.chat_box import ChatBubble
-from .input_text_box import InputTextBox
-from .mic_button import MicButton
 
 class SendButton(QPushButton):
     def __init__(self):

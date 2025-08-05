@@ -34,7 +34,7 @@ def load_stylesheets(app):
 def create_app():
     app = QApplication(sys.argv)
     app.setApplicationName("Desktop Assistant")
-    app.setStyle("Fusion")
+    app.setStyle("Fusion")      
     app.setWindowIcon(QIcon("assets/icons/app.png"))
     load_stylesheets(app=app)
 

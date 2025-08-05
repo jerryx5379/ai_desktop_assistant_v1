@@ -1,39 +1,23 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QTextBrowser, QApplication
+    QTextBrowser, QApplication
 )
-from PySide6.QtCore import Qt, QEvent, QTimer
-from PySide6.QtGui import QPalette
+from PySide6.QtCore import QTimer,QThread, QObject
+from PySide6.QtGui import QPalette,QTextCursor, QFontMetrics
 
-
-import pathlib
 import json
-
-from widgets.chat_box import ChatBubble
-
-
-
-from PySide6.QtWidgets import (
-    QHBoxLayout,QPushButton,QTextBrowser
-)
-from PySide6.QtGui import QTextCursor, QFontMetrics
-from PySide6.QtCore import QThread, QTimer, Qt
-
 import markdown
 from pygments.formatters.html import HtmlFormatter
 
-from threads import OllamaWorker
 from widgets.chat_box import ChatBubble
-from PySide6.QtCore import QObject, QThread, QTimer, Qt
-
+from threads import OllamaWorker
 from core import CallableFunctions
 
 class ChatController(QObject):
-    def __init__(self, chat_box, user_input, prompt=None):
+    def __init__(self, chat_box, user_input):
         super().__init__()
 
         self.chat_box = chat_box
         self.user_input = user_input
-        self.prompt = prompt
 
         self.scroll_content = self.chat_box.get_scroll_content()
         self.scroll_layout = self.chat_box.get_scroll_layout()
@@ -52,10 +36,7 @@ class ChatController(QObject):
             self.input_text_box.clear()
             return
 
-        if self.prompt:
-            text = self.prompt
-        else:
-            text = self.input_text_box.toPlainText().strip() 
+        text = self.input_text_box.toPlainText().strip() 
         if not text:
             return
 
@@ -157,10 +138,10 @@ class ChatController(QObject):
         )
 
     def get_data_tool_call(self,user_prompt):
-        prompt_skeleton = """Determine if the following prompt requires each of these function calls:
+        prompt_skeleton = """Determine if the following prompt requires any of these function calls:
 change_system_theme_to_dark
 change_system_theme_to_light
-0 means no. 1 means yes
+0 means no. 1 means yes. 
 Prompt:"""
 
         prompt = prompt_skeleton + user_prompt

@@ -1,21 +1,17 @@
 from PySide6.QtWidgets import (
-    QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout,QFrame, QSizePolicy
+    QHBoxLayout,QVBoxLayout,QFrame, QSizePolicy
 )
-from PySide6.QtGui import QTextCursor, QFontMetrics, QIcon
-from PySide6.QtCore import QThread, QTimer, Qt, Signal, QSize
+from PySide6.QtCore import Signal
 
-import markdown
-from pygments.formatters.html import HtmlFormatter
-
-from threads import OllamaWorker
-from widgets.chat_box import ChatBubble
 from .input_text_box import InputTextBox
 from .mic_button import MicButton
 from .send_button import SendButton
+from .rag_button import RagButton
 
 
 class UserInput(QFrame):
     send_message_signal = Signal()
+    open_rag_window_signal = Signal()
 
     def __init__(self):
         super().__init__()
@@ -36,9 +32,11 @@ class UserInput(QFrame):
         self.buttons_layout = QHBoxLayout()
         self.buttons_layout.setSpacing(10)
 
+        self.rag_button = RagButton()
         self.mic_button = MicButton()
         self.send_button = SendButton()
 
+        self.buttons_layout.addWidget(self.rag_button)
         self.buttons_layout.addStretch()
         self.buttons_layout.addWidget(self.mic_button)
         self.buttons_layout.addWidget(self.send_button)
@@ -52,6 +50,7 @@ class UserInput(QFrame):
 
         # Conenct signals that send the message
         self.send_button.clicked.connect(self.send_message_signal.emit)
+        self.rag_button.clicked.connect(self.open_rag_window_signal.emit)
         self.input_text.send_message_signal.connect(self.send_message_signal.emit)
         self.mic_button.update_input_box.connect(self.update_user_text_box)
         self.mic_button.send_message_signal.connect(self.send_message_signal.emit)

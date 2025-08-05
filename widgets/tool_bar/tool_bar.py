@@ -1,14 +1,8 @@
 from PySide6.QtWidgets import (
-    QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout, QWidget, QSizePolicy, QFrame
+    QHBoxLayout, QSizePolicy, QFrame
 )
-from PySide6.QtGui import QTextCursor, QFontMetrics, QIcon
-from PySide6.QtCore import QThread, QTimer, Qt, Signal, QSize
+from PySide6.QtCore import Signal
 
-import markdown
-from pygments.formatters.html import HtmlFormatter
-
-from threads import OllamaWorker
-from widgets.chat_box import ChatBubble
 from .restart_button import RestartButton
 from .history_button import HistoryButton
 

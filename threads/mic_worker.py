@@ -1,13 +1,8 @@
-import json
 from PySide6.QtCore import QObject, Signal, Slot
-import requests
 from faster_whisper import WhisperModel
 import collections
-import faster_whisper
 import numpy as np
 import pyaudio
-import torch.cuda
-import wave
 
 class MicWorker(QObject):
     finished_loading = Signal()

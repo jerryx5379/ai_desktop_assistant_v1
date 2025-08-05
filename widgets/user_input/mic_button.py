@@ -1,15 +1,8 @@
 from PySide6.QtWidgets import (
-    QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout
+    QPushButton
 )
-from PySide6.QtGui import QTextCursor, QFontMetrics, QIcon
-from PySide6.QtCore import QThread, QTimer, Qt, Signal, QSize
-
-import markdown
-from pygments.formatters.html import HtmlFormatter
-
-from threads import OllamaWorker
-from widgets.chat_box import ChatBubble
-from .input_text_box import InputTextBox
+from PySide6.QtGui import QIcon
+from PySide6.QtCore import Signal, QSize
 from logic import MicButtonController
 
 class MicButton(QPushButton):

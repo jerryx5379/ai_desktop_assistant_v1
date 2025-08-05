@@ -1,31 +1,6 @@
-from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QTextBrowser, QApplication
-)
-from PySide6.QtCore import Qt, QEvent, QTimer
-from PySide6.QtGui import QPalette
+from PySide6.QtCore import QThread,Signal,QObject
 
-
-import pathlib
-import json
-
-from widgets.chat_box import ChatBubble
-
-
-
-from PySide6.QtWidgets import (
-    QHBoxLayout,QPushButton,QTextBrowser
-)
-from PySide6.QtGui import QTextCursor, QFontMetrics
-from PySide6.QtCore import QThread, QTimer, Qt, Signal
-
-import markdown
-from pygments.formatters.html import HtmlFormatter
-
-from threads import OllamaWorker, MicWorker
-
-
-from widgets.chat_box import ChatBubble
-from PySide6.QtCore import QObject, QThread, QTimer, Qt
+from threads import MicWorker
 
 class MicButtonController(QObject):
     send_message_signal = Signal()

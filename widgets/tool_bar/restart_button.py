@@ -1,14 +1,9 @@
 from PySide6.QtWidgets import (
-    QHBoxLayout,QPushButton,QTextBrowser,QVBoxLayout, QWidget
+    QPushButton
 )
-from PySide6.QtGui import QTextCursor, QFontMetrics, QIcon
-from PySide6.QtCore import QThread, QTimer, Qt, Signal, QSize, Signal
+from PySide6.QtGui import QIcon
+from PySide6.QtCore import Signal, QSize, Signal
 
-import markdown
-from pygments.formatters.html import HtmlFormatter
-
-from threads import OllamaWorker
-from widgets.chat_box import ChatBubble
 
 
 class RestartButton(QPushButton):

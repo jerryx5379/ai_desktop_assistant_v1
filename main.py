@@ -6,20 +6,18 @@ It also sets application level details like system name of this app, application
 
 # TODO: add load model and unload model on program start and end
 # TODO: add save chat on program close
-
-# This version TODO: 
-# Add a tool bar at the top of the chat:
-# 1. clear chat -> clear chat and save chat
-# 2. previous chats -> new window: previous chats 
-# 3. on program/window close, save chat
-
-# plan:
-# first create the tool bar on top
-# then add funcitonality
+# TODO: add a icon with pyinstaller when making the exe     pyinstaller --onefile --windowed --icon="assets/icons/app_icon.ico" main.py
 
 
-from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QFontDatabase, QFont
+# This version TODO: add the the rag search button
+# first maybe change it so there is a "tool"... ehh idk
+# add a file button in the inputarea, 
+# on button click, open another window that has folders of files that can be rag searched through. 
+# have text parsers for:  pdf and docx
+
+# Plan:
+# first create a script that can take in files, create vector embeddings, then rag search that
+
 
 import sys
 
