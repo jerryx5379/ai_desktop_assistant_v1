@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import (
-    QTextBrowser, QApplication, QFrame, QSizePolicy, QVBoxLayout, QLabel, QScrollArea, QWidget
+    QFrame, QSizePolicy, QVBoxLayout, QLabel, QScrollArea, QWidget
 )
 
-from PySide6.QtGui import QIcon, QDragEnterEvent, QDropEvent
-from PySide6.QtCore import Qt, QUrl, Signal
+from PySide6.QtGui import QDragEnterEvent, QDropEvent
+from PySide6.QtCore import Signal
 
 
 class NewFileScreen(QFrame):

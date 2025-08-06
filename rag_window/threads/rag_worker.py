@@ -1,13 +1,8 @@
 from PySide6.QtWidgets import (
     QTextBrowser, QApplication
 )
-from PySide6.QtCore import QTimer,QThread, QObject, Signal, Slot
-from PySide6.QtGui import QPalette,QTextCursor, QFontMetrics
+from PySide6.QtCore import QObject, Signal, Slot
 
-import json
-import markdown
-from pygments.formatters.html import HtmlFormatter
-from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
 import re

@@ -1,19 +1,8 @@
 from PySide6.QtWidgets import (
     QTextBrowser, QApplication
 )
-from PySide6.QtCore import QTimer,QThread, QObject, Slot,Signal
-from PySide6.QtGui import QPalette,QTextCursor, QFontMetrics
-
-import json
-import markdown
-from pygments.formatters.html import HtmlFormatter
-import numpy as np
-import faiss
-import re
-
-from widgets.chat_box import ChatBubble
-from threads import OllamaWorker, SpeakerWorker
-from core import CallableFunctions, EmbeddingModel
+from PySide6.QtCore import QThread, QObject, Slot
+from threads import SpeakerWorker
 
 
 

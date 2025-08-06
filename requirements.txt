@@ -1,0 +1,10 @@
+pyside6
+pyaudio
+requests
+faster-whisper
+PyMuPDF
+faiss-cpu
+markdown
+pygments
+coqui-tts
+sentence-transformers

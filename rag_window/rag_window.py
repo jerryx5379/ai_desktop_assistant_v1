@@ -1,10 +1,7 @@
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QStackedWidget, QFrame
+    QWidget, QVBoxLayout, QStackedWidget, QFrame
     )
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
-import sys
-from pathlib import Path
 
 from .empty_screen import EmptyScreen
 from .new_file_screen import NewFileScreen

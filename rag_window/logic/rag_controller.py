@@ -1,18 +1,11 @@
 from PySide6.QtWidgets import (
-    QTextBrowser, QApplication, QFrame, QSizePolicy, QVBoxLayout, QLabel, QHBoxLayout, QPushButton
+    QTextBrowser, QApplication, QFrame, QSizePolicy, QLabel, QHBoxLayout, QPushButton
 )
 
-from PySide6.QtCore import QObject,QSize, QTimer, Signal
+from PySide6.QtCore import QObject,QSize, Signal,QThread
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import QTimer,QThread, QObject
-from PySide6.QtGui import QPalette,QTextCursor, QFontMetrics
-
-from ..new_file_screen import NewFileScreen
 from rag_window.threads import RagWorker
 
-import fitz
-import os
-from collections import deque
 from pathlib import Path
 
 

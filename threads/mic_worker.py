@@ -1,5 +1,6 @@
 from PySide6.QtCore import QObject, Signal, Slot
 from faster_whisper import WhisperModel
+
 import collections
 import numpy as np
 import pyaudio

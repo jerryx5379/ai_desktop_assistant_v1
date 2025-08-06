@@ -1,7 +1,5 @@
 from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QPalette, QIcon
-
-import sys
+from PySide6.QtGui import QPalette
 
 def update_qss_theme():
     app = QApplication.instance()

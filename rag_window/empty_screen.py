@@ -1,11 +1,8 @@
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QFrame, QSizePolicy
+    QVBoxLayout, QLabel, QFrame, QSizePolicy
     )
-from PySide6.QtCore import Qt, QUrl, Signal
-from PySide6.QtGui import QIcon, QDragEnterEvent, QDropEvent
-import sys
-
-from util import FlowLayout
+from PySide6.QtCore import Qt,Signal
+from PySide6.QtGui import QDragEnterEvent, QDropEvent
 
 
 class EmptyScreen(QFrame):

@@ -1,8 +1,7 @@
-import json
 from PySide6.QtCore import QObject, Signal, Slot
-import requests
 
-from PySide6.QtCore import QObject, Signal
+import requests
+import json
 
 class OllamaWorker(QObject):
     text_chunk = Signal(str) 
