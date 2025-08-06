@@ -4,12 +4,12 @@ import numpy as np
 import re
 
 # Load a model fine-tuned for question-answer retrieval (dual-encoder style)
-model = SentenceTransformer('msmarco-MiniLM-L6-cos-v5')
+#model = SentenceTransformer('msmarco-MiniLM-L6-cos-v5')
 
-"""
+
 import fitz
 
-doc = fitz.open("sample.pdf")
+doc = fitz.open("Payment_info.pdf")
 text = ""
 for page in doc:
     text += page.get_text()
@@ -19,6 +19,8 @@ answers = re.split(r'\n\s*\n', text)
 
 print(answers)
 
+
+"""
 # 1. Embed the answers separately
 answer_embeddings = model.encode(answers, convert_to_numpy=True)
 
@@ -29,8 +31,20 @@ faiss.normalize_L2(answer_embeddings)
 dim = answer_embeddings.shape[1]
 index = faiss.IndexFlatIP(dim)  # Inner product = cosine similarity on normalized vectors
 index.add(answer_embeddings)
+
+
+
 """
 
+
+
+
+
+
+
+
+
+"""
 answers = np.load("user_data/file_text_chunks/aggregated/text_chunks.npy", allow_pickle=True).tolist()
 index = faiss.read_index("user_data/embeddings/aggregated/index.faiss")
 
@@ -52,6 +66,10 @@ if __name__ == "__main__":
         if q.lower() == 'exit':
             break
         search_question(q)
+
+"""
+
+
 
 
 

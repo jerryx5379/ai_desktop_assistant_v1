@@ -11,7 +11,7 @@ QTextBrowser#assistantBubble {
 
 QFrame#chatWindowToolBar {
     background-color: gray;
-
+    border-radius: 3px;
 }
 
 QFrame#userInput {

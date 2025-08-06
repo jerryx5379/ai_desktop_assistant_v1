@@ -20,6 +20,7 @@ class ChatController(QObject):
         super().__init__()
 
         self.OPERATING_SYSTEM_INTERACTION_FLAG = False
+        self.model = EmbeddingModel.model
 
         self.chat_box = chat_box
         self.user_input = user_input
@@ -52,6 +53,10 @@ class ChatController(QObject):
         # This adds the user's text message to the chat_box
         self.chat_bubble = ChatBubble(text=text, sender= "user")
         self.scroll_layout.insertWidget(self.scroll_layout.count(), self.chat_bubble)
+
+        # Rag search step: before updating the chat context with the user prompt, add rag context if there is
+        text = self.add_rag_context(text=text)
+
         self.chat_box.update_chat_context(role = "user", message = text)
         self.input_text_box.clear()
 
@@ -316,24 +321,54 @@ Prompt:"""
         self.layout_spacing = self.chat_box.scroll_layout.spacing()
         self.total_scroll_content_height = 0
 
-    def vector_search(self, text, top_k=1):
-        answers = np.load("user_data/file_text_chunks/aggregated/text_chunks.npy", allow_pickle=True).tolist()
-        index = faiss.read_index("user_data/embeddings/aggregated/index.faiss")
-        model = EmbeddingModel.model
+    def vector_search(self, text, top_k=5):
+        try:
+            answers = np.load("user_data/file_text_chunks/aggregated/text_chunks.npy", allow_pickle=True).tolist()
+            index = faiss.read_index("user_data/embeddings/aggregated/index.faiss")
+        except FileNotFoundError as e:
+            return []
 
-        query_embedding = model.encode([text], convert_to_numpy=True)
+        query_embedding = self.model.encode([text], convert_to_numpy=True)
         faiss.normalize_L2(query_embedding)
+        
         distances, indices = index.search(query_embedding, top_k)
 
+        results = []
         print(f"\nQuestion: {text}")
-        print(f"Top {top_k} answers:")
-        #for dist, idx in zip(distances[0], indices[0]):
-        #    print(f"  - ({dist:.4f}) {answers[idx]}")
-        dist, idx = zip(distances[0], indices[0])
-        if dist > 0.45:
-            return answers[idx]
-        else:
-            return ""
+        print(f"Top {top_k} potential answers:")
+
+        for dist, idx in zip(distances[0], indices[0]):
+            if idx == -1:
+                continue
+            
+            print(f"  - (Score: {dist:.4f}) {answers[idx]}")
+            if dist > 0.45:
+                results.append(answers[idx])
+        
+        return results
+        
+    def add_rag_context(self, text) -> str:
+        rag_context = self.vector_search(text=text)
+
+        all_context = ""
+        for context in rag_context:
+            if len(all_context) > 800:
+                break
+            all_context += f"\n{context}"
+
+        print(all_context)
+
+        new_text = f"""Respond to the prompt using this information:
+{all_context}
+
+Prompt:
+{text}  
+"""
+        if len(rag_context) == 0:
+            new_text = text
+
+        return new_text
+
         
     @Slot()
     def toggle_operating_system_interaction(self):

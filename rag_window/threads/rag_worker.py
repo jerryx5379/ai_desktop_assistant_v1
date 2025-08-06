@@ -102,7 +102,10 @@ class RagWorker(QObject):
         doc = fitz.open(pdf_path)
         text = ""
         for page in doc:
-            text += page.get_text()
+            new_text = page.get_text().strip()
+            if len(new_text) < 40:
+                continue
+            text += new_text
 
         text_chunks = re.split(r'\n\s*\n', text)
         return text_chunks
