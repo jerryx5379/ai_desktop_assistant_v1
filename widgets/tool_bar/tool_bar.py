@@ -11,7 +11,7 @@ class Toolbar(QFrame):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color:gray;")
+        self.setObjectName("chatWindowToolBar")
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
         self.main_layout = QHBoxLayout(self)

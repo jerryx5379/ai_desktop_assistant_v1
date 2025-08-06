@@ -11,6 +11,7 @@ from pygments.formatters.html import HtmlFormatter
 from widgets.chat_box import ChatBubble
 from threads import OllamaWorker
 from core import CallableFunctions
+from util import update_qss_theme
 
 class ChatController(QObject):
     def __init__(self, chat_box, user_input):
@@ -226,8 +227,6 @@ Prompt:"""
         self.send_button.setEnabled(True)
 
         self.end_thread()
-
-    
 
 
     ### Helper Functions ###

@@ -8,3 +8,35 @@ QTextBrowser#assistantBubble {
     color: black;
 
 }
+
+QFrame#chatWindowToolBar {
+    background-color: #d9d9d9;
+
+}
+
+QFrame#userInput {
+    background-color: #d9d9d9;
+
+}
+
+
+QWidget#newFileScreenScrollContent QFrame {
+    background-color: #d9d9d9;
+
+}
+
+QTextEdit#inputTextBox {
+    background-color:#d9d9d9;
+
+}
+
+
+
+
+
+
+
+
+
+
+

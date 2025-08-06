@@ -108,7 +108,6 @@ class RagController(QObject):
         bubble = QFrame()
         bubble.setObjectName(file_name)
         bubble.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        bubble.setStyleSheet("background-color: gray; border-radius:15px")
 
         layout = QHBoxLayout(bubble)
 
@@ -174,6 +173,8 @@ class RagController(QObject):
         self.update_stacked_widget.emit()
 
     def aggregation_thread_end(self):
+        print("aggregation Thread finished")
+
         self.aggregation_thread.quit()
         self.aggregation_thread.wait()  
         

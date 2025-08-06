@@ -10,3 +10,18 @@ QTextBrowser#assistantBubble {
     margin: 4px;
     border: none;
 }
+
+QFrame#userInput {
+    border-radius: 15px;
+
+}
+
+
+QWidget#newFileScreenScrollContent QFrame {
+    border-radius: 15px;
+
+}
+
+
+
+

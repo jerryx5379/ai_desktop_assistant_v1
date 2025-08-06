@@ -17,12 +17,7 @@ class UserInput(QFrame):
         super().__init__()
         self.setObjectName("userInput")
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)    
-        self.setStyleSheet("""
-        QFrame {
-            background-color: #666666;
-            border-radius: 15px;
-        }
-        """)
+        
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(5,5,5,5) 

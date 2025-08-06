@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QTextBrowser, QApplication, QFrame, QSizePolicy, QVBoxLayout, QLabel
+    QTextBrowser, QApplication, QFrame, QSizePolicy, QVBoxLayout, QLabel, QScrollArea, QWidget
 )
 
 from PySide6.QtGui import QIcon, QDragEnterEvent, QDropEvent
@@ -15,10 +15,20 @@ class NewFileScreen(QFrame):
         self.setAcceptDrops(True)
 
 
-        self.new_screen_layout = QVBoxLayout(self)
-        self.new_screen_layout.setContentsMargins(10,10,10,10)
-        self.new_screen_layout.setSpacing(7)
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
 
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.main_layout.addWidget(self.scroll_area)
+
+        self.scroll_content = QWidget()
+        self.scroll_content.setObjectName("newFileScreenScrollContent")
+        self.scroll_area.setWidget(self.scroll_content)
+
+        self.new_screen_layout = QVBoxLayout(self.scroll_content)
+        self.new_screen_layout.setContentsMargins(10, 10, 10, 10)
+        self.new_screen_layout.setSpacing(7)
         self.new_screen_layout.addStretch()
 
     def dragEnterEvent(self, event: QDragEnterEvent):
