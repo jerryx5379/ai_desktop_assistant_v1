@@ -10,7 +10,7 @@ from .chat_box import ChatBox
 from .user_input import UserInput
 from .tool_bar import Toolbar
 
-from logic import ChatController, ToolBarController, RagController
+from logic import ChatController, ToolBarController, RagController, SpeakerController
 
 class MainChatWindow(QWidget):  
     def __init__(self):
@@ -18,7 +18,7 @@ class MainChatWindow(QWidget):
         self.setWindowTitle("Assistant")
         self.setMinimumSize(150,250) 
         self.setWindowOpacity(0.83)
-        #self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         
         self.main_layout = QVBoxLayout(self)
 
@@ -31,8 +31,9 @@ class MainChatWindow(QWidget):
         self.main_layout.addWidget(self.user_input, 0)
 
 
-        self.tool_bar_controller = ToolBarController(chat_box=self.chat_box)
+        self.tool_bar_controller = ToolBarController(chat_box=self.chat_box, tool_bar=self.tool_bar)
         self.tool_bar.clear_chat.connect(self.tool_bar_controller.clear_chat)
+        self.tool_bar.toggle_conversation_mode.connect(self.tool_bar_controller.toggle_conversation_mode)
         
         self.chat_controller = ChatController(chat_box=self.chat_box, user_input=self.user_input)
         self.user_input.send_message_signal.connect(self.chat_controller.send_message)
@@ -41,6 +42,10 @@ class MainChatWindow(QWidget):
 
         self.rag_controller = RagController()
         self.user_input.open_rag_window_signal.connect(self.rag_controller.open_rag_window) 
+
+        self.speaker_controller = SpeakerController(tool_bar=self.tool_bar)
+        self.chat_controller.llm_response.connect(self.speaker_controller.new_response)   
+        self.tool_bar.toggle_speaker_mode.connect(self.speaker_controller.toggle_speaker_mode)
 
         self.config_path = pathlib.Path.home() / ".Ollama_project_config.json"
 

@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QTextBrowser, QApplication
 )
-from PySide6.QtCore import QTimer,QThread, QObject, Slot
+from PySide6.QtCore import QTimer,QThread, QObject, Slot,Signal
 from PySide6.QtGui import QPalette,QTextCursor, QFontMetrics
 
 import json
@@ -16,6 +16,8 @@ from core import CallableFunctions, EmbeddingModel
 
 
 class ChatController(QObject):
+    llm_response = Signal(str)
+
     def __init__(self, chat_box, user_input):
         super().__init__()
 
@@ -104,6 +106,8 @@ class ChatController(QObject):
         
 
     def worker_finished(self, response):
+        self.llm_response.emit(response)
+
         if hasattr(self, 'chat_bubble') and self.chat_bubble is not None:
             self.chat_box.update_chat_context(role = "assistant", message = response)
 
@@ -334,14 +338,14 @@ Prompt:"""
         distances, indices = index.search(query_embedding, top_k)
 
         results = []
-        print(f"\nQuestion: {text}")
-        print(f"Top {top_k} potential answers:")
+        #print(f"\nQuestion: {text}")
+        #print(f"Top {top_k} potential answers:")
 
         for dist, idx in zip(distances[0], indices[0]):
             if idx == -1:
                 continue
             
-            print(f"  - (Score: {dist:.4f}) {answers[idx]}")
+            #print(f"  - (Score: {dist:.4f}) {answers[idx]}")
             if dist > 0.45:
                 results.append(answers[idx])
         
@@ -356,7 +360,6 @@ Prompt:"""
                 break
             all_context += f"\n{context}"
 
-        print(all_context)
 
         new_text = f"""Respond to the prompt using this information:
 {all_context}

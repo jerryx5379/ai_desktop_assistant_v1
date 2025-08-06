@@ -55,6 +55,25 @@ class ChatBox(QScrollArea):
         }
         return data
     
+    def toggle_conversation_mode(self, enabled:bool):
+        if enabled:
+            new_system_instruc = "Keep your responses short"
+            ChatBox.toggle_conversation_mode_instruc(new_system_instruc=new_system_instruc)
+            if self.messages[0]["role"] == "system":
+                self.messages[0]["content"] = new_system_instruc
+                #print(self.messages)
+        else:
+            new_system_instruc = "You are a personal AI assistant. Keep your responses concise to the prompt"
+            ChatBox.toggle_conversation_mode_instruc(new_system_instruc=new_system_instruc)
+            if self.messages[0]["role"] == "system":
+                self.messages[0]["content"] = new_system_instruc
+
+    ### Helper Functions ###
+
+    @classmethod
+    def toggle_conversation_mode_instruc(cls, new_system_instruc):
+        cls.SYS_INSTRUC = new_system_instruc
+
 
     
 
