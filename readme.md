@@ -32,7 +32,7 @@ The assistant includes:
 
 3. **Clone this repository**
    ```bash
-   git clone <your-repo-url>
+   git clone [<your-repo-url>](https://github.com/jerryx5379/ai_desktop_assistant_v1.git)
    cd <project-folder>
    ```
 
@@ -50,3 +50,4 @@ The assistant includes:
    ```bash
    python main.py
    ```
+
