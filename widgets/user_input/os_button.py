@@ -5,11 +5,11 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import QSize, Signal
 
 
-class RagButton(QPushButton):
+class OSButton(QPushButton):
 
     def __init__(self):
         super().__init__()
-        self.setIcon(QIcon("assets/icons/folder.svg"))
+        self.setIcon(QIcon("assets/icons/os.svg"))
         self.setIconSize(QSize(24,24))
         self.setStyleSheet("""
         QPushButton {
@@ -26,5 +26,12 @@ class RagButton(QPushButton):
             background-color: #a4a6a5;
         }
         """)   
+
+
+
+
+
+
+
 
        

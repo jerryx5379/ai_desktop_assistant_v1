@@ -36,6 +36,7 @@ class MainChatWindow(QWidget):
         
         self.chat_controller = ChatController(chat_box=self.chat_box, user_input=self.user_input)
         self.user_input.send_message_signal.connect(self.chat_controller.send_message)
+        self.user_input.toggle_operating_system_interaction.connect(self.chat_controller.toggle_operating_system_interaction)
         self.tool_bar_controller.early_cancel.connect(self.chat_controller.set_early_cancel)
 
         self.rag_controller = RagController()

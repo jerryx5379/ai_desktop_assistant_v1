@@ -1,21 +1,25 @@
 from PySide6.QtWidgets import (
     QTextBrowser, QApplication
 )
-from PySide6.QtCore import QTimer,QThread, QObject
+from PySide6.QtCore import QTimer,QThread, QObject, Slot
 from PySide6.QtGui import QPalette,QTextCursor, QFontMetrics
 
 import json
 import markdown
 from pygments.formatters.html import HtmlFormatter
+import numpy as np
+import faiss
 
 from widgets.chat_box import ChatBubble
 from threads import OllamaWorker
-from core import CallableFunctions
-from util import update_qss_theme
+from core import CallableFunctions, EmbeddingModel
+
 
 class ChatController(QObject):
     def __init__(self, chat_box, user_input):
         super().__init__()
+
+        self.OPERATING_SYSTEM_INTERACTION_FLAG = False
 
         self.chat_box = chat_box
         self.user_input = user_input
@@ -24,6 +28,7 @@ class ChatController(QObject):
         self.scroll_layout = self.chat_box.get_scroll_layout()
         self.send_button = self.user_input.get_send_button()
         self.input_text_box = self.user_input.get_input_text_box()
+        self.os_button = self.user_input.get_os_button()
         
         self.total_chat_bubbles_height = 0
         self.layout_spacing = self.chat_box.scroll_layout.spacing()
@@ -32,6 +37,7 @@ class ChatController(QObject):
         sample_chat_bubble = ChatBubble(text="1",sender="user")
         QTimer.singleShot(0,lambda: self.get_indiv_line_height(sample_chat_bubble))
 
+    @Slot()
     def send_message(self):
         if not self.send_button.isEnabled():
             self.input_text_box.clear()
@@ -56,19 +62,26 @@ class ChatController(QObject):
         self.chat_bubble = ChatBubble(text=text,sender = "assistant")
         self.scroll_layout.insertWidget(self.scroll_layout.count(), self.chat_bubble)
 
-        self.thread = QThread()
-        self.thread.setObjectName("Ollama_inference_tool_call_thread")
-        url = "http://localhost:11434/api/generate"
-        data = self.get_data_tool_call(text)
-        self.worker = OllamaWorker(url=url, data=data)
-        self.worker.moveToThread(self.thread)
+        if self.OPERATING_SYSTEM_INTERACTION_FLAG:
+            self.thread = QThread()
+            self.thread.setObjectName("Ollama_inference_tool_call_thread")
+            url = "http://localhost:11434/api/generate"
+            data = self.get_data_tool_call(text)
+            self.worker = OllamaWorker(url=url, data=data)
+            self.worker.moveToThread(self.thread)
 
-        self.thread.started.connect(self.thinking_text)
-        self.thread.started.connect(self.worker.generate_ollama)
-        self.worker.early_cancel_signal.connect(self.early_cancel_func)
-        self.worker.finished.connect(self.finished_generating_tool_call_response) # rest of the send_message logic is here
+            self.thread.started.connect(self.thinking_text)
+            self.thread.started.connect(self.worker.generate_ollama)
+            self.worker.early_cancel_signal.connect(self.early_cancel_func)
+            self.worker.finished.connect(self.finished_generating_tool_call_response) # rest of the send_message logic is here
 
-        self.thread.start()
+            self.thread.start()
+
+        else:
+            self.thread = False
+            self.worker = False
+            empty_result = '{"empty": 0}'
+            self.finished_generating_tool_call_response(empty_result)
 
 
     def handle_output_chunk(self, chunk):
@@ -173,20 +186,24 @@ Prompt:"""
     def finished_generating_tool_call_response(self, result):
         """
         result looks like:
-
+        '
         {
         "change_to_dark_theme": int,
         "change_to_light_theme": int
         }
+        '
 
         """
-        self.end_thread()
 
         llm_result = json.loads(result)
+
+        if self.thread and self.worker:
+            self.end_thread()
 
         # if there is a tool call, then just do that, otherwise send request to llm as usual
         if 1 in llm_result.values():
             # start another thread to carry out the tool call
+
             self.thread = QThread()
             self.thread.setObjectName("thread_for_callable_functions")
             self.worker = CallableFunctions(llm_result)
@@ -198,6 +215,7 @@ Prompt:"""
             
             self.thread.start()
         else:
+
             self.thread = QThread()
             self.thread.setObjectName("Ollama_inference_thread")
 
@@ -289,6 +307,7 @@ Prompt:"""
         self.layout_spacing = self.chat_box.scroll_layout.spacing()
         self.total_scroll_content_height = 0
 
+    @Slot()
     def early_cancel_func(self):
         self.send_button.setEnabled(True)
         self.end_thread()
@@ -297,6 +316,61 @@ Prompt:"""
         self.layout_spacing = self.chat_box.scroll_layout.spacing()
         self.total_scroll_content_height = 0
 
+    def vector_search(self, text, top_k=1):
+        answers = np.load("user_data/file_text_chunks/aggregated/text_chunks.npy", allow_pickle=True).tolist()
+        index = faiss.read_index("user_data/embeddings/aggregated/index.faiss")
+        model = EmbeddingModel.model
 
+        query_embedding = model.encode([text], convert_to_numpy=True)
+        faiss.normalize_L2(query_embedding)
+        distances, indices = index.search(query_embedding, top_k)
+
+        print(f"\nQuestion: {text}")
+        print(f"Top {top_k} answers:")
+        #for dist, idx in zip(distances[0], indices[0]):
+        #    print(f"  - ({dist:.4f}) {answers[idx]}")
+        dist, idx = zip(distances[0], indices[0])
+        if dist > 0.45:
+            return answers[idx]
+        else:
+            return ""
+        
+    @Slot()
+    def toggle_operating_system_interaction(self):
+        if self.OPERATING_SYSTEM_INTERACTION_FLAG:
+            self.OPERATING_SYSTEM_INTERACTION_FLAG = False
+
+            self.os_button.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                color: white;
+            }
+            QPushButton:disabled {
+                background-color: transparent;
+            }
+
+            QPushButton:hover {
+                background-color: #a4a6a5;
+            }
+            """) 
+
+
+        else:
+            self.OPERATING_SYSTEM_INTERACTION_FLAG =  True
+            self.os_button.setStyleSheet("""
+            QPushButton {
+                background-color: green;
+                border: none;
+            }
+            QPushButton:disabled {
+                background-color: transparent;
+                color: #aaaaaa;
+            }
+
+            QPushButton:hover {
+                background-color: #a4a6a5;
+            }
+            """) 
 
 

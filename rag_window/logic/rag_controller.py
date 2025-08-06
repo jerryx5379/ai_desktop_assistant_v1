@@ -77,6 +77,9 @@ class RagController(QObject):
         target_path = Path("user_data/embeddings") / (bubble_name + ".npy")
         target_path.unlink()
 
+        target_path = Path("user_data/file_text_chunks") / (bubble_name + ".npy")
+        target_path.unlink()
+
         self.aggregate_embeddings_and_create_indexes()
         self.update_stacked_widget.emit()
 

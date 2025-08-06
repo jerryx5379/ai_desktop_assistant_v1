@@ -35,7 +35,7 @@ class RagWorker(QObject):
         for pdf_path in pdf_paths:
 
             if not hasattr(self,'model'):
-                self.model = EmbeddingModel._model
+                self.model = EmbeddingModel.model
 
             text_chunks = self.parse_pdf_to_text_chunks(pdf_path=pdf_path)
 
@@ -44,6 +44,7 @@ class RagWorker(QObject):
 
             file_name = os.path.basename(pdf_path)
             np.save(f'user_data/embeddings/{file_name}.npy', embeddings)
+            np.save(f'user_data/file_text_chunks/{file_name}.npy', text_chunks)
 
             self.emit_file_name.emit(file_name)
 
@@ -52,9 +53,9 @@ class RagWorker(QObject):
     @Slot()
     def aggregate_embeddings_and_create_indexes(self):
         folder = Path("user_data/embeddings")
-        npy_files = sorted(folder.glob("*.npy"))
+        embedding_files = sorted(folder.glob("*.npy"))
 
-        if not npy_files:
+        if not embedding_files:
             empty_npy = np.empty((0,EmbeddingModel.vector_length)) 
             np.save('user_data/embeddings/aggregated/embeddings.npy', empty_npy)
 
@@ -63,10 +64,14 @@ class RagWorker(QObject):
             index.add(empty_npy)
             faiss.write_index(index, "user_data/embeddings/aggregated/index.faiss")
 
+            empty = np.array([])
+            np.save('user_data/file_text_chunks/aggregated/text_chunks.npy', empty)
+
+
             self.finished_aggregating.emit()
             return
 
-        arrays = [np.load(f) for f in npy_files]
+        arrays = [np.load(f) for f in embedding_files]
         stacked = np.vstack(arrays)  # Shape: (total_rows, embedding_dim)
 
         np.save('user_data/embeddings/aggregated/embeddings.npy', stacked)
@@ -75,8 +80,16 @@ class RagWorker(QObject):
         index = faiss.IndexFlatIP(dim)
         index.add(stacked)
 
-
         faiss.write_index(index, "user_data/embeddings/aggregated/index.faiss")
+
+        # This part for the file_text_chunks
+        folder = Path("user_data/file_text_chunks")
+        text_chunk_files = sorted(folder.glob("*.npy"))
+
+        arrays = [np.load(f) for f in text_chunk_files]
+        combined = np.concatenate(arrays)
+
+        np.save('user_data/file_text_chunks/aggregated/text_chunks.npy', combined)
 
         self.finished_aggregating.emit()
 
